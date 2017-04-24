@@ -1,175 +1,175 @@
 /* 
- * Archivo:   main.cpp
- * Autor: administrador
+ * File:   main.cpp
+ * Author: Alberto García
  *
- * Creado el 20 de febrero de 2017, a las 14:16
+ * Created on 20th February, 2017, 14:16
  */
 
-// Librerías y cabeceras
-#include <iostream> // Librería básica de consola.
-#include <cstdlib> // Para rand.
-#include <ctime> // Para tener fecha (como semilla inicial para rand).
+// Libraries and headers.
+#include <iostream> // Basic library for console.
+#include <cstdlib> // For rand.
+#include <ctime> // For having a date (as initial seed for rand).
 
-// Variables globales (mala idea)
-const int g_SLOTS=3; // Casillas para cada tirada.
-const int g_SYMBOLS=5; // Valores posibles que pueden salir.
-const int g_COST=1; // "Precio" por partida
+// Global variables (bad, but useful idea here)
+const int g_SLOTS=3; // Slots for each round.
+const int g_SYMBOLS=5; // Different values we can get.
+const int g_COST=1; // "Price" for each round-
 
-//Funciones
+// Functions
 
-// Comprobador de premio en filas
-int f_filas (int array[][g_SLOTS]) {
-    int l_premio = 0; // Para devolver un valor al main.
-    for (int a = 0; a < g_SLOTS; a++) {
-        int prize_checker = 0; // Registro de igualdades entre símbolos.
-        for (int b = 0; b < g_SLOTS - 1; b++) {
+// Row prize checker.
+int f_rows (int array[][g_SLOTS]) {
+    int row_reward = 0; // I need to return a value to main.
+    for (int a = 0; a < g_SLOTS; a++) { // For each row in the slot machine.
+        int reward_checker = 0; // Log of equalities between symbols.
+        for (int b = 0; b < g_SLOTS - 1; b++) { // Check each slot.
             if (array[a][b] == array[a][b+1]) {
-                prize_checker = prize_checker + 1;
+                reward_checker = reward_checker + 1;
             }
         }
-        if (prize_checker == g_SLOTS - 1) {
-            l_premio = l_premio + array[a][0];
+        if (reward_checker == g_SLOTS - 1) {
+            row_reward = row_reward + array[a][0]; // Just a log for the reward.
         }
     }
-    return l_premio;
+    return row_reward;
 }
 
-// Comprobador de premio en columnas.
-int f_columnas (int array[][g_SLOTS]) {
-    int l_premio = 0; // Para devolver un valor al main.
-    for (int a = 0; a < g_SLOTS; a++) {
-        int prize_checker = 0; // Registro de igualdades entre símbolos.
-        for (int b = 0; b < g_SLOTS - 1; b++) {
+// Column reward checker.
+int f_columns (int array[][g_SLOTS]) {
+    int column_reward = 0; // I need to return a value to main.
+    for (int a = 0; a < g_SLOTS; a++) { // For each column in the slot machine.
+        int reward_checker = 0; // Log of equalities between symbols.
+        for (int b = 0; b < g_SLOTS - 1; b++) { // Check each slot.
             if (array[b][a] == array[b+1][a]) {
-                prize_checker = prize_checker + 1;
+                reward_checker = reward_checker + 1;
             }
         }
-        if (prize_checker == g_SLOTS - 1) {
-            l_premio = l_premio + array[0][a];
+        if (reward_checker == g_SLOTS - 1) {
+            column_reward = column_reward + array[0][a];
         }
     }
-    return l_premio;
+    return column_reward;
 }
 
-// Comprobador de premio en la diagona principal.
-int f_diagonal (int array[][g_SLOTS]) {
-    int l_premio = 0; // Para devolver valor al main.
-    int prize_checker = 0; // Registro de igualdades entre símbolos.
-    for (int a = 0; a < g_SLOTS - 1; a++) {
-        if (array[a][a] == array[a+1][a+1]) {
-            prize_checker = prize_checker + 1;
+// Main diagonal reward checker.
+int f_mdiagonal (int array[][g_SLOTS]) {
+    int mdiagonal_reward = 0; // I need to return a value to main.
+    int reward_checker = 0; // Log of equalities between symbols.
+    for (int a = 0; a < g_SLOTS - 1; a++) { // If I'm in range of the matrix.
+        if (array[a][a] == array[a+1][a+1]) { // Diagonal checker.
+            reward_checker = reward_checker + 1;
         }
-        if (prize_checker == g_SLOTS - 1) {
-            l_premio = l_premio + array[0][0];
+        if (reward_checker == g_SLOTS - 1) {
+            mdiagonal_reward = mdiagonal_reward + array[0][0];
         }
     }
-    return l_premio;
+    return mdiagonal_reward;
 }
 
-// Comprobador de premio en la diagona secundaria.
-int f_secundaria (int array[][g_SLOTS]){
-    int l_premio = 0; // Para devolverle valor al main.
-    int prize_checker = 0; // Registro de igualdades entre símbolos.
+// Secondary diagonal reward checker.
+int f_sdiagonal (int array[][g_SLOTS]){
+    int sdiagonal_reward = 0; // I need to return a value to main.
+    int reward_checker = 0; // Log of equalities between symbols.
     for (int a = g_SLOTS-1; 0 < a; a--) {
-        // La suma es a + b = g_SLOTS - 1 
+        // Sum must be a + b = g_SLOTS - 1 
         if (array[a][g_SLOTS-1-a] == array[a-1][g_SLOTS-a]) {
-            prize_checker = prize_checker + 1;
+            reward_checker = reward_checker + 1;
         }
-        if (prize_checker == g_SLOTS - 1) {
-            l_premio = l_premio + array[g_SLOTS-1][0];
+        if (reward_checker == g_SLOTS - 1) {
+            sdiagonal_reward = sdiagonal_reward + array[g_SLOTS-1][0];
         }
     }
-    return l_premio;
+    return sdiagonal_reward;
 }
 
 /*
- * Hagamos esto un poco más complicado: las tiradas se almacenan como matrices
- * 3x3, y son 9 elementos ordenados. Ahora, las comprobaciones para premio se
- * hacen por filas, columnas y diagonales (principal y secundaria).
- */
+ * Let's make this a bit more complicated: each round is stored as a 2D, 3x3-matrix
+ * and they are 9 arranged values. Now, reward checks are done by row, column and
+ * both main and secondary diagonals
+ *  */
 
 int main(int argc, char** argv) {
-    // Recuperemos el array multidimensional.
-    int resultados[g_SLOTS][g_SLOTS];
-    // Expliquemos algunas variables un poco más.
-    int dinero = 0; // Dinero que introduce el jugador.
-    int premio = 0; // Tokens ganados en las partidas.
-    int bote = 0; // Tokens acumulados a lo largo de las partidas.
-    int total = 0; // Partidas totales jugadas.
-    // Variables de texto para control de entrada de usuario.
-    char answer[2] = "y"; // Para seguir jugando (o no).
-    char addprize[2] = "y"; // Para añadir el premio a las tiradas (o no).
+    // Here I have a squared array.
+    int results[g_SLOTS][g_SLOTS];
+    // Let's explain some variables a little.
+    int money = 0; // Money the player "invests".
+    int r_reward = 0; // Tokens rewarded on each round.
+    int r_chest = 0; // Tokens saved along rounds.
+    int total = 0; // Total rounds played.
+    // Some text variables to control user input.
+    char answer[2] = "y"; // To keep playing (or not).
+    char addprize[2] = "y"; // To add rewards to get more rounds (or not).
     
-    // Un poco de texto por pantalla, para pedir instrucciones.
-    std::cout << "Bienvenido a esta máquina de azar.\n";
-    std::cout << "¿Cuánto dinero quieres introducir?: ";
-    std::cin >> dinero;
-    std::cout << "Vamos a hacer " << dinero/g_COST << " tiradas.\n\n";
+    // A bit of text on screen, to make it user-friendly.
+    std::cout << "Welcome to this slot machine.\n";
+    std::cout << "How much money you want to play?: ";
+    std::cin >> money;
+    std::cout << "We'll play, at least, " << money/g_COST << " rounds.\n\n";
 
     
-    // Iniciamos el generador aleatorio.
+    // I start the RNG.
     srand(time(NULL));
-    // Este while es para controlar si el jugador quiere continuar o no.
+    // This while is to control if the player wants to keep playing.
     while ((answer[0] == 'y')||(answer[0] == 'Y')) {
-        if (dinero >= 1) {
-            dinero = dinero - g_COST; // Descontamos una tirada.
+        if (money >= 1) {
+            money = money - g_COST; // I take a round.
             total = total + 1;
-            premio = 0; // Reiniciamos el premio.
+            r_reward = 0; // I reset the reward.
     
-            // Rellenemos y mostremos la matriz (evitamos un bucle).
-            for (int a = 0; a < g_SLOTS; a++) {// Esto marca las filas.
-                for (int b = 0; b < g_SLOTS; b++) {// Y esto las columnas.
-                    resultados[a][b] = std::rand() % g_SYMBOLS + 1;
-                    std::cout << resultados[a][b] << " ";
+            // I fill and display a matrix (I avoid a loop).
+            for (int a = 0; a < g_SLOTS; a++) { // This stands for rows.
+                for (int b = 0; b < g_SLOTS; b++) { // And this for columns.
+                    results[a][b] = std::rand() % g_SYMBOLS + 1;
+                    std::cout << results[a][b] << " ";
                 }
                 std::cout << "\n";
             }
             std::cout << "\n";
     
-            // Creo que puedo hacer esto con funciones y punteros.
-            // Comprobación de las filas.
-            premio = premio + f_filas(resultados);
+            // I'm pretty sure I can do this with pointers. Maybe later.
+            // Row checks.
+            r_reward = r_reward + f_rows(results);
     
-            // Comprobación de las columnas.
-            premio = premio + f_columnas(resultados);
+            // Column checks.
+            r_reward = r_reward + f_columns(results);
             
-            // Vamos con la diagonal principal.
-            premio = premio + f_diagonal(resultados);
+            // Main diagonal check.
+            r_reward = r_reward + f_mdiagonal(results);
             
-            // La diagonal secundaria puede ser un poco más complicada...
-            premio = premio + f_secundaria(resultados);
+            // Secondary diagonal check.
+            r_reward = r_reward + f_sdiagonal(results);
 
             
-            // Sumamos los premios y los mostramos juntos al final.
-            if (premio != 0) {
-                std::cout << "¡Has ganado! Tu premio es de " << premio << "€.\n\n";
-                std::cout << "¿Quieres añadir el premio para tener más tiradas?: ";
+            // I add the rewards and display together at the end.
+            if (r_reward != 0) {
+                std::cout << "You won! Your reward is " << r_reward << "$.\n\n";
+                std::cout << "Do you want to add the reward to get more rounds?: ";
                 std::cin >> addprize;
                 if ((addprize[0] == 'y')||(addprize[0] == 'Y')) {
-                    dinero = dinero + premio;
+                    money = money + r_reward;
                 } else {
-                    bote = bote + premio; // Si no, el premio va al bote.
+                    r_chest = r_chest + r_reward; // If not, rewards are stored.
                 }
-            } else {
-                std::cout << "Vuelve a intentarlo.\n\n";
+            } else { // In case I have no luck.
+                std::cout << "Try again.\n\n";
             }
-            // Ahora, para saber si queremos seguir tirando o no...
-            std::cout << "Te quedan " << dinero/g_COST << " tiradas.\n";
-            std::cout << "Tu premio acumulado es " << bote << "€.\n";
-            std::cout << "¿Quieres seguir jugando? (y/n): ";
+            // Now, to know if I can keep playing...
+            std::cout << "You still have " << money/g_COST << " rounds.\n";
+            std::cout << "Your saved reward is " << r_chest << "$.\n";
+            std::cout << "Do you want to play another round? (y/n): ";
             std::cin >> answer;
             std::cout << std::endl;
         } else {
-            std::cout << "Lo siento, no te quedan tiradas.\n\n";
+            std::cout << "Sorry, you have no rounds left.\n\n";
             answer[0]='n';
-            // ¿Y si queremos añadir el bote para seguir jugando?
-            // ¿O si queremos liquidar el dinero metido?
+            // What if I want to add saved rewards to keep playing?
+            // Or if I want to take my remaining money?
         }
     }
     
-    // Final del programa, resumen de los datos.
-    std::cout << "Al final de la partida,\nhas jugado " << total << " rondas\n";
-    std::cout << "y tu premio acumulado es de " << bote << "€.\n";
+    // Program's end, data summary.
+    std::cout << "At the end of the game,\n you have played " << total << " rounds\n";
+    std::cout << "and your total reward is " << r_chest << "$.\n";
         
     return 0;
 }
