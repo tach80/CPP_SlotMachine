@@ -9,6 +9,8 @@
 #include <iostream> // Basic library for console.
 #include <cstdlib> // For rand.
 #include <ctime> // For having a date (as initial seed for rand).
+#include <fstream> //For file dumping.
+#include <string> // For string functions.
 
 // Global variables (bad, but useful idea here)
 const int g_SLOTS=3; // Slots for each round.
@@ -82,6 +84,25 @@ int f_sdiagonal (int array[][g_SLOTS]){
     return sdiagonal_reward;
 }
 
+// Ok, let's improve this: a parser to store results on a file.
+// An easy one, this time.
+// Let's get the matrix cells and store them. Simple.
+void f_storeresults (int resultado[g_SLOTS][g_SLOTS]) {
+    // To store results
+    std::string storableresults;
+    // Parsing and storing the matrix into a variable.
+    for (int i = 0; i < g_SLOTS; i++) {
+        for (int j = 0; j < g_SLOTS; j++) {
+            storableresults += std::to_string(resultado[i][j]);
+        }
+    }
+    // Storing results.
+    std::ofstream file;
+    file.open ("/home/user/results.txt", std::ios_base::app | std::ios_base::out); // Append mode
+    file << storableresults << "\n";
+    file.close();
+}
+
 /*
  * Let's make this a bit more complicated: each round is stored as a 2D, 3x3-matrix
  * and they are 9 arranged values. Now, reward checks are done by row, column and
@@ -126,6 +147,9 @@ int main(int argc, char** argv) {
             }
             std::cout << "\n";
     
+            // Now, let's store the results.
+            f_storeresults(results);
+            
             // I'm pretty sure I can do this with pointers. Maybe later.
             // Row checks.
             r_reward = r_reward + f_rows(results);
@@ -168,7 +192,7 @@ int main(int argc, char** argv) {
     }
     
     // Program's end, data summary.
-    std::cout << "At the end of the game,\n you have played " << total << " rounds\n";
+    std::cout << "At the end of the game,\nyou have played " << total << " rounds\n";
     std::cout << "and your total reward is " << r_chest << "$.\n";
         
     return 0;
